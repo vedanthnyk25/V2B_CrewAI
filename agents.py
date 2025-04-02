@@ -1,25 +1,35 @@
 from crewai import Agent
+from tools import yt_tool, web_search_tool
+from langchain_groq import ChatGroq
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+groq_api_key = os.getenv["GROQ_API_KEY"]
+
+llm = ChatGroq(
+        model_name="llama-3.3-70b-versatile", 
+        api_key= groq_api_key  
+)
 
 ##Create a senior blog content researcher
 
-blog_researcher= Agent(
-    role= 'Blog researcher from youtube videos',
-    goal= 'Get the relevant video content for the topic {topic} from YT channel',
-    verbose= True,
-    memory= True,
-    backstory=(
-        '''
-        This AI agent is a highly specialized content researcher and curator, trained to analyze YouTube videos with precision. 
-        It understands complex topics in AI, Data Science, Machine Learning, Generative AI, and Agentic AI, extracting valuable insights, key takeaways, and expert perspectives.
-        With advanced natural language processing and summarization capabilities, it processes large volumes of video content, identifies trends, and structures information into an organized research format. 
-        The agent ensures that blog writers receive highly relevant, data-driven insights, saving time and enhancing content quality.
-        Additionally, this agent can collaborate with other AI agents to refine research, validate information, and suggest additional sources when needed.
-        '''
-    ),
-    tools=[],
-    allow_delegation= True
-    
+blog_researcher = Agent(
+    role="AI Research & Content Curator",
+    goal="Extract insights from YouTube videos and cross-verify with web content for {topic}.",
+    verbose=True,
+    memory=True,
+    backstory=''' 
+        An advanced AI research agent that specializes in collecting, analyzing, and validating insights from multiple sources. 
+        It extracts key information from YouTube videos and cross-verifies the details using web articles, research papers, and 
+        authoritative sources. This ensures high-quality, well-researched content for blog writing.
+    ''',
+    tools=[yt_tool, web_search_tool],  # Now uses both YouTube & Web Search
+    allow_delegation=True,
+    llm=llm
 )
+
 
 ## creating a senior blog writer agent with YT tool
 
@@ -38,6 +48,7 @@ blog_writer = Agent(
         providing in-depth technical insights for experts. 
     ''',
     tools=[],
-    allow_delegation=False
+    allow_delegation=False,
+    llm=llm
 )
 
